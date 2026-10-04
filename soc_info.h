@@ -114,6 +114,17 @@ typedef struct {
  * have a check for this condition (reading from restricted addresses
  * typically returns zero) and then activate the SMC workaround if needed.
  */
+typedef enum {
+	SMC_WORKAROUND_DIRECT_SMC,
+	SMC_WORKAROUND_SECURE_SVC_SMC_THUNK,
+} smc_workaround_t;
+
+typedef struct {
+	uint32_t vector_addr;
+	uint32_t gicc_base;
+	uint32_t gicd_base;
+} monitor_smc_handler;
+
 typedef struct {
 	uint32_t           soc_id;       /* ID of the SoC */
 	const char         *name;        /* human-readable SoC name string */
@@ -135,6 +146,11 @@ typedef struct {
 	bool               icache_fix;
 	/* Use SMC workaround (enter secure mode) if can't read from this address */
 	uint32_t           needs_smc_workaround_if_zero_word_at_addr;
+	/* Require non-zero sid_base + offset before applying SMC workaround */
+	uint32_t           secure_boot_fuse_offset;
+	/* Apply SMC workaround */
+	smc_workaround_t   smc_workaround;
+	const monitor_smc_handler *monitor_smc_handler;
 	uint32_t           sram_size;	/* Usable contiguous SRAM at spl_addr */
 	sram_swap_buffers *swap_buffers;
 } soc_info_t;
